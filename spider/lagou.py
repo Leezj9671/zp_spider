@@ -4,7 +4,7 @@ import time
 import requests
 import pymysql.cursors
 
-from config import SQL_ADDR, SQL_PORT, SQL_DATABASE, SQL_PWD, SQL_TABLE, SQL_USER, PROXY_API_URL
+from config import SQL_ADDR, SQL_PORT, SQL_DATABASE, SQL_PWD, JOB_SQL_TABLE, SQL_USER, PROXY_API_URL, COMPANY_SQL_TABLE
 from headers import get_lagou_header
 
 def save_json_to_mysql(jsondata):
@@ -19,16 +19,20 @@ def save_json_to_mysql(jsondata):
                              charset='utf8mb4',
                              cursorclass=pymysql.cursors.DictCursor)
     try:
+        # with connection.cursor() as cursor:        
+        #     company_sql = "INSERT INTO {}(companyFullName, companyUrl, companyShortName, companySize, financeStage) VALUES (%s, %s, %s, %s, %s)".format(COMPANY_SQL_TABLE)
+        #     cursor.execute(company_sql, [jsondata["companyFullName"], 'https://www.lagou.com/gongsi/{}}.html'.format(jsondata["companyId"]), jsondata["companyShortName"], jsondata["companySize"], jsondata["financeStage"]])
+        # connection.commit()
+        # with connection.cursor() as cursor:
+        #     job_sql = "INSERT INTO {}(city, createTime, district, education, positionAdvantage, positionName, positionID, positionURL, salary, workYear, crawl_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())".format(JOB_SQL_TABLE)
+        #     cursor.execute(job_sql, [jsondata["city"], jsondata["createTime"], jsondata["district"], jsondata["education"], jsondata["positionAdvantage"].replace('&nbsp;', ''), jsondata["positionName"], jsondata["positionId"], 'https://www.lagou.com/jobs/{}.html'.format(jsondata["positionId"]), jsondata["salary"], jsondata["workYear"],])
+        # connection.commit()
         with connection.cursor() as cursor:
-            sql = "INSERT INTO {}(city, companyFullName, companyID,companyShortName, companySize, createTime, district, education, financeStage, positionAdvantage, positionName, positionID, positionURL, salary, workYear, crawl_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())".format(SQL_TABLE)
+            sql = "INSERT INTO {}(city, companyFullName, companyID,companyShortName, companySize, createTime, district, education, financeStage, positionAdvantage, positionName, positionID, positionURL, salary, workYear, crawl_time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())".format(JOB_SQL_TABLE)
             cursor.execute(sql, [jsondata["city"], jsondata["companyFullName"], jsondata["companyId"], jsondata["companyShortName"], jsondata["companySize"], jsondata["createTime"], jsondata["district"], jsondata["education"], jsondata["financeStage"], jsondata["positionAdvantage"].replace('&nbsp;', ''), jsondata["positionName"], jsondata["positionId"], 'https://www.lagou.com/jobs/{}.html'.format(jsondata["positionId"]), jsondata["salary"], jsondata["workYear"],])
         connection.commit()
-
-        # with connection.cursor() as cursor:
-        #     sql = "SELECT * FROM `{}`".format(SQL_TABLE)
-        #     cursor.execute(sql)
-        #     result = cursor.fetchone()
-        #     print(result)
+    except Exception as e:
+        print(e)
     finally:
         connection.close()
 
@@ -41,7 +45,7 @@ def main():
     ajax_url = 'https://www.lagou.com/jobs/positionAjax.json?px=new&needAddtionalResult=false&isSchoolJob=1'
     # 抓取应届毕业生的招聘信息
     post_param = {"first": "false", "pn": "1", "kd": ""}
-    for pn in range(1, 10):
+    for pn in range(1, 50):
         post_param['pn'] = str(pn)
         is_success = False
         try_times = 10
