@@ -18,6 +18,10 @@ python3 run.py
 ```
 
 ## API示例
+API|说明
+--|--
+/api/jobs?page=[int] | 获取当前所有招聘信息的第N页
+/api/jobs/[string]?page=[int] | 获取指定关键字招聘信息的第N页
 
 ## TODO
 1. 

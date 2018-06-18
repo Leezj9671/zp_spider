@@ -29,10 +29,10 @@ class EmployInfoTest(db.Model):
 
     def getData(self):
         """
-        返回dict类型的数据
+        返回dict类型的数据,删除了多个参数
         """
         data = vars(self)
         data.pop('_sa_instance_state')
+        data.pop('id')
         data.pop('crawl_time')
         return data
-
